@@ -19,6 +19,7 @@ UENUM()
 enum class EMaterials : uint8
 {
 	Unknown          UMETA(DisplayName = "Unknown"),
+	None             UMETA(DisplayName = "None"),
 	Iron             UMETA(DisplayName = "Iron"),
 	Coal             UMETA(DisplayName = "Coal"),
 	Steel_Beam       UMETA(DisplayName = "Steel Beam"),
@@ -31,8 +32,7 @@ enum class EBuildingStates : uint8
 {
 	Unknown          UMETA(DisplayName = "Unknown"),
 	Producing        UMETA(DisplayName = "Producing"),
-	Waiting          UMETA(DisplayName = "Waiting"),
-	Exporting        UMETA(DisplayName = "Exporting")
+	Waiting          UMETA(DisplayName = "Waiting")
 };
 
 UENUM()
@@ -40,6 +40,7 @@ enum class EVehicleStates : uint8
 {
 	Unknown          UMETA(DisplayName = "Unknown"),
 	Idle             UMETA(DisplayName = "Idle"),
+	Fetching         UMETA(DisplayName = "Fetching"),
 	Loading          UMETA(DisplayName = "Loading"),
 	Delivering       UMETA(DisplayName = "Delivering"),
 	Unloading        UMETA(DisplayName = "Unloading")

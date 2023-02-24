@@ -3,12 +3,35 @@
 
 #include "BuildingActorComponent.h"
 #include "UserDefinedDataTypes.h"
+#include "VehicleActorComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 
 UBuildingActorComponent::UBuildingActorComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 
+	// Default Values
+	this->InputLimit = 3;
+	this->OutputLimit = 3;
+	this->ProductionSpeed = 5.0f;
+
+	this->CraftingMaterial1 = EMaterials::Unknown;
+	this->CraftingMaterial2 = EMaterials::Unknown;
+
+	// Assigning delegates
+	TArray<AActor*> VehicleList;
+	UGameplayStatics::GetAllActorsOfClass(this->GetWorld(), AActor::StaticClass(), VehicleList);
+
+	for (auto actor : VehicleList)
+	{
+		UVehicleActorComponent* component = actor->FindComponentByClass< UVehicleActorComponent>();
+
+		if (component != nullptr)
+		{
+			this->OnReadyToExportDelegate.AddUObject(component, &UVehicleActorComponent::ReceieveNotif);
+		}
+	}
 }
 
 
@@ -16,8 +39,6 @@ void UBuildingActorComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	this->InputLimit = FMath::RandRange(this->InputStorageLimitRange.GetLowerBoundValue(), this->InputStorageLimitRange.GetUpperBoundValue());
-	this->OutputLimit = FMath::RandRange(this->OutputStorageLimitRange.GetLowerBoundValue(), this->OutputStorageLimitRange.GetUpperBoundValue());
 
 	this->InputStorageCount1 = 0;
 	this->InputStorageCount2 = 0;
@@ -32,6 +53,7 @@ void UBuildingActorComponent::BeginPlay()
 void UBuildingActorComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
 
 	if (this->BuildingState == EBuildingStates::Waiting)
 	{
@@ -51,6 +73,7 @@ void UBuildingActorComponent::Produce()
 
 	if (this->ElapsedProduction >= this->ProductionSpeed)
 	{
+		// check if storage has space for new product, else place the product as pending for output
 		if (this->OutputStorageCount < this->OutputLimit)
 		{
 			this->OutputStorageCount++;
@@ -68,11 +91,11 @@ void UBuildingActorComponent::Produce()
 
 void UBuildingActorComponent::CheckIfBuildingCanProduce()
 {
-	if (this->OutputStorageCount == this->OutputLimit)
+	if (this->OutputStorageCount == this->OutputLimit && this->bHasPendingMaterialForOutput)
 		return;
 
 
-	if (this->CraftingMaterial1 == EMaterials::Unknown && this->CraftingMaterial2 == EMaterials::Unknown)
+	if (this->CraftingMaterial1 == EMaterials::None && this->CraftingMaterial2 == EMaterials::None)
 	{
 		if (this->bHasPendingMaterialForOutput)
 		{
@@ -83,7 +106,7 @@ void UBuildingActorComponent::CheckIfBuildingCanProduce()
 		this->BuildingState = EBuildingStates::Producing;
 		Produce();
 	}
-	else if (this->InputStorageCount1 != 0 && this->InputStorageCount2 != 0)
+	else if (this->InputStorageCount1 > 0 && this->InputStorageCount2 > 0)
 	{
 		if (this->bHasPendingMaterialForOutput)
 		{
@@ -98,6 +121,7 @@ void UBuildingActorComponent::CheckIfBuildingCanProduce()
 		Produce();
 	}
 }
+
 
 void UBuildingActorComponent::ImportMaterial(EMaterials material)
 {
@@ -116,7 +140,6 @@ void UBuildingActorComponent::ExportMaterial()
 	this->OutputStorageCount--;
 }
 
-
 bool UBuildingActorComponent::CheckIfInputStorageIsFull(EMaterials material)
 {
 	bool isStorageFull = true;
@@ -132,13 +155,6 @@ bool UBuildingActorComponent::CheckIfInputStorageIsFull(EMaterials material)
 
 	return isStorageFull;
 }
-
-
-bool UBuildingActorComponent::CheckIfOutputStorageIsFull()
-{
-	return (this->OutputStorageCount == this->OutputLimit);
-}
-
 
 FVector UBuildingActorComponent::GetBuildingPosition()
 {

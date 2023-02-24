@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
-#include "Math/Range.h"
 #include "UserDefinedDataTypes.h"
 #include "BuildingActorComponent.generated.h"
 
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnReadyToExportSignature, FVector);
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -33,15 +34,14 @@ public:
 	UFUNCTION() void ImportMaterial(EMaterials material);
 	UFUNCTION() void ExportMaterial();
 	UFUNCTION() bool CheckIfInputStorageIsFull(EMaterials material);
-	UFUNCTION() bool CheckIfOutputStorageIsFull();
 	UFUNCTION() FVector GetBuildingPosition();
 
 
 // ATTRIBUTES
 private:
 	// Configurables
-	UPROPERTY(EditAnywhere) FInt32Range InputStorageLimitRange;
-	UPROPERTY(EditAnywhere) FInt32Range OutputStorageLimitRange;
+	UPROPERTY(EditAnywhere) uint32 InputLimit;
+	UPROPERTY(EditAnywhere) uint32 OutputLimit;
 	UPROPERTY(EditAnywhere) float ProductionSpeed;
 
 	UPROPERTY(EditAnywhere) EMaterials CraftingMaterial1;
@@ -49,14 +49,16 @@ private:
 
 
 	// Normal Buildings Attributes
-	UPROPERTY(VisibleAnywhere) int32 InputLimit;
-	UPROPERTY(VisibleAnywhere) int32 OutputLimit;
-	UPROPERTY(VisibleAnywhere) int32 InputStorageCount1;
-	UPROPERTY(VisibleAnywhere) int32 InputStorageCount2;
-	UPROPERTY(VisibleAnywhere) int32 OutputStorageCount;
+	UPROPERTY(VisibleAnywhere) uint32 InputStorageCount1;
+	UPROPERTY(VisibleAnywhere) uint32 InputStorageCount2;
+	UPROPERTY(VisibleAnywhere) uint32 OutputStorageCount;
 
 	UPROPERTY(VisibleAnywhere) bool bHasPendingMaterialForOutput;
 	UPROPERTY(VisibleAnywhere) float ElapsedProduction;
 
 	UPROPERTY(VisibleAnywhere) EBuildingStates BuildingState;
+
+
+	// Delegate
+	FOnReadyToExportSignature OnReadyToExportDelegate;
 };
