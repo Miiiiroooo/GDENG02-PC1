@@ -2,6 +2,9 @@
 
 
 #include "VehicleActorComponent.h"
+#include "PC1_GameMode.h"
+#include "Kismet/GameplayStatics.h"
+
 
 UVehicleActorComponent::UVehicleActorComponent()
 {
@@ -34,25 +37,185 @@ UVehicleActorComponent::UVehicleActorComponent()
 }
 
 
+// PROTECTED METHODS
 void UVehicleActorComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
 
+	// Default Values
 	this->StorageLimit = FMath::RandRange((int32)this->StorageLowerLimit, (int32)this->StorageUpperLimit);
 	ResetDeliveryTimes();
 
-	this->StorageCount = 0;
 	this->ElapsedTime = 0.0f;
+	this->StartPosition = this->GetComponentLocation();
+	this->EndPosition = FVector::ZeroVector;
+
+	this->bIsVehicleAvailableToFetch = true;
 	this->VehicleState = EVehicleStates::Idle;
+
+
+	// Assigning delegates
+	APC1_GameMode* GameMode = Cast<APC1_GameMode>(UGameplayStatics::GetGameMode(this));
+	if (GameMode != nullptr)
+	{
+		this->OnReadyToFetchDelegate.AddUObject(GameMode, &APC1_GameMode::OnVehicleReadyToFetch);
+	}
 }
 
 
+// PUBLIC METHODS
 void UVehicleActorComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+
+	switch (this->VehicleState)
+	{
+	case EVehicleStates::Fetching:
+
+		OnTravelingState();
+		break;
+
+	case EVehicleStates::Delivering:
+
+		OnTravelingState();
+		break;
+
+	default:
+
+		break;
+	}
 }
+
+EVehicleStates UVehicleActorComponent::GetVehicleState()
+{
+	return this->VehicleState;
+}
+
+float UVehicleActorComponent::GetLoadingTime()
+{
+	return this->LoadingTime;
+}
+
+float UVehicleActorComponent::GetUnloadingTime()
+{
+	return this->UnloadingTime;
+}
+
+bool UVehicleActorComponent::IsVehicleAvailableToFetch()
+{
+	return this->bIsVehicleAvailableToFetch;
+}
+
+void UVehicleActorComponent::FetchMaterial(FVector BuildingLocation)
+{
+	if (this->Storage.Num() < (int32)this->StorageLimit)
+	{
+		this->bIsVehicleAvailableToFetch = false;
+		this->VehicleState = EVehicleStates::Fetching;
+
+		this->StartPosition = this->GetComponentLocation();
+		this->EndPosition = BuildingLocation;
+	}
+}
+
+void UVehicleActorComponent::StopVehicle()
+{
+	switch (this->VehicleState)
+	{
+	case EVehicleStates::Fetching:
+
+		this->VehicleState = EVehicleStates::Loading;
+		this->ElapsedTime = 0.0f;
+		break;
+
+	case EVehicleStates::Delivering:
+
+		this->VehicleState = EVehicleStates::Unloading;
+		this->ElapsedTime = 0.0f;
+		break;
+
+	default:
+
+		break;
+	}
+}
+
+void UVehicleActorComponent::LoadMaterial(FVector NextBuildingLocation, TArray<EMaterials>& Materials)
+{
+	for (int32 i = 0; i < Materials.Num(); i++)
+	{
+		this->Storage.Add(Materials[0]);
+	}
+
+	this->VehicleState = EVehicleStates::Delivering;
+	this->StartPosition = this->GetComponentLocation();
+	this->EndPosition = NextBuildingLocation;
+}
+
+void UVehicleActorComponent::UnloadMaterial(TArray<EMaterials>& Materials)
+{
+	// Unload every material inside storage
+	for (int32 i = 0; i < Materials.Num(); i++)
+	{
+		this->Storage.RemoveSingle(Materials[0]);
+	}
+
+	// Reset values of vehicle
+	ResetDeliveryTimes();
+	this->bIsVehicleAvailableToFetch = true;
+
+	// Call delegate function that vehicle is ready to fetch more materials
+	if (this->OnReadyToFetchDelegate.IsBound())
+	{
+		this->OnReadyToFetchDelegate.Broadcast();
+	}
+}
+
+
+// PRIVATE METHODS
+void UVehicleActorComponent::OnTravelingState()
+{
+	this->ElapsedTime += this->GetWorld()->GetDeltaSeconds();
+
+	float interpolatedValue = this->ElapsedTime / this->TravelTime;
+	FVector newPos = this->StartPosition + interpolatedValue * (this->EndPosition - this->StartPosition);
+
+	this->SetWorldLocation(newPos);
+}
+
+//void UVehicleActorComponent::OnLoadingState()
+//{
+//	this->ElapsedTime = 0.0f;
+//	this->VehicleState = EVehicleStates::Loading;
+//
+//	/*this->ElapsedTime += this->GetWorld()->GetDeltaSeconds();
+//
+//	if (this->ElapsedTime > this->LoadingTime)
+//	{
+//
+//	}*/
+//}
+//
+//void UVehicleActorComponent::OnUnloadingState()
+//{
+//	this->VehicleState = EVehicleStates::Unloading;
+//	this->ElapsedTime = 0.0f;
+//
+//	/*this->ElapsedTime += this->GetWorld()->GetDeltaSeconds();
+//
+//	if (this->ElapsedTime > this->UnloadingTime)
+//	{
+//		if (this->OnReadyToFetchMaterialDelegate.IsBound())
+//		{
+//			this->OnReadyToFetchMaterialDelegate.Broadcast();
+//		}
+//
+//		ResetDeliveryTimes();
+//		this->bIsVehicleAvailableToFetch = true;
+//	}*/
+//}
 
 void UVehicleActorComponent::ResetDeliveryTimes()
 {
@@ -61,25 +224,8 @@ void UVehicleActorComponent::ResetDeliveryTimes()
 	this->TravelTime = FMath::RandRange((int32)this->TravelTimeLowerLimit, (int32)this->TravelTimeUpperLimit);
 }
 
-void UVehicleActorComponent::LoadMaterial()
-{
-
-}
-
-void UVehicleActorComponent::UnloadMaterial()
-{
-
-}
-
 void UVehicleActorComponent::DeliverMaterial()
 {
-
-}
-
-void UVehicleActorComponent::ReceieveNotif(FVector BuildingLocation)
-{
-	if (this->StorageCount < this->StorageLimit)
-	{
-		this->VehicleState = EVehicleStates::Fetching;
-	}
+	this->VehicleState = EVehicleStates::Delivering;
+	this->ElapsedTime = 0.0f;
 }

@@ -8,6 +8,11 @@
 #include "VehicleActorComponent.generated.h"
 
 
+class UBuildingActorComponent; // forward declaration
+
+DECLARE_MULTICAST_DELEGATE(FOnReadyToFetchSignature);
+
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GDENG02_PC1_API UVehicleActorComponent : public USceneComponent
 {
@@ -21,16 +26,24 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-private:
-	UFUNCTION() void ResetDeliveryTimes();
-	UFUNCTION() void LoadMaterial();
-	UFUNCTION() void UnloadMaterial();
-	UFUNCTION() void DeliverMaterial();
-
-public:	
+public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	UFUNCTION() void ReceieveNotif(FVector BuildingLocation);
+	UFUNCTION() EVehicleStates GetVehicleState();
+	UFUNCTION() float GetLoadingTime();
+	UFUNCTION() float GetUnloadingTime();
+	UFUNCTION() bool IsVehicleAvailableToFetch();
+	UFUNCTION() void FetchMaterial(FVector BuildingLocation);
+	UFUNCTION() void StopVehicle();
+	UFUNCTION() void LoadMaterial(FVector NextBuildingLocation, TArray<EMaterials>& Materials);
+	UFUNCTION() void UnloadMaterial(TArray<EMaterials>& Materials);
+
+private:
+	UFUNCTION() void OnTravelingState();   // includes both fetching and delivering
+	/*UFUNCTION() void OnLoadingState();
+	UFUNCTION() void OnUnloadingState();*/
+	UFUNCTION() void ResetDeliveryTimes();
+	UFUNCTION() void DeliverMaterial();
 
 		
 // ATTRIBUTES
@@ -53,12 +66,20 @@ private:
 
 	// Normal Vehicle Attributes
 	UPROPERTY(VisibleAnywhere) uint32 StorageLimit;
-	UPROPERTY(VisibleAnywhere) uint32 StorageCount;
+	UPROPERTY(VisibleAnywhere) TArray<EMaterials> Storage;
 
 	UPROPERTY(VisibleAnywhere) float LoadingTime;
-	UPROPERTY(VisibleAnywhere) float UnloadingTime;
 	UPROPERTY(VisibleAnywhere) float TravelTime;
+	UPROPERTY(VisibleAnywhere) float UnloadingTime;
 	UPROPERTY(VisibleAnywhere) float ElapsedTime;
 
+	UPROPERTY(VisibleAnywhere) FVector StartPosition;
+	UPROPERTY(VisibleAnywhere) FVector EndPosition;
+
+	UPROPERTY(VisibleAnywhere) bool bIsVehicleAvailableToFetch;
 	UPROPERTY(VisibleAnywhere) EVehicleStates VehicleState;
+
+
+	// Delegates
+	FOnReadyToFetchSignature OnReadyToFetchDelegate;
 };
