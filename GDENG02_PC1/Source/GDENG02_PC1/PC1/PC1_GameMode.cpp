@@ -8,6 +8,13 @@
 
 APC1_GameMode::APC1_GameMode(const FObjectInitializer& ObjectInitializer)
 {
+	
+}
+
+void APC1_GameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
 	// Get all vehicles in level
 	TArray<AActor*> ActorList;
 	UGameplayStatics::GetAllActorsOfClass(this->GetWorld(), AActor::StaticClass(), ActorList);

@@ -15,6 +15,10 @@ class GDENG02_PC1_API APC1_GameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
+
+protected:
+	virtual void BeginPlay() override;
+
 public:
 	APC1_GameMode(const FObjectInitializer& ObjectInitializer);
 
