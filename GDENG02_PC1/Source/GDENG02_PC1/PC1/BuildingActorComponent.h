@@ -33,6 +33,7 @@ public:
 	UFUNCTION() FVector GetBuildingPosition();
 
 private:
+	UFUNCTION() void AssignMaterialsToBuilding();
 	UFUNCTION() void Produce();
 	UFUNCTION() void CheckIfBuildingCanProduce();
 
@@ -41,14 +42,11 @@ private:
 private:
 	// Configurables
 	UPROPERTY(EditAnywhere) FName BuildingName;
+	UPROPERTY(EditAnywhere) EBuildingTypes BuildingType;
 
 	UPROPERTY(EditAnywhere) uint32 InputLimit;
 	UPROPERTY(EditAnywhere) uint32 OutputLimit;
 	UPROPERTY(EditAnywhere) float ProductionSpeed;
-
-	UPROPERTY(EditAnywhere) EMaterials CraftingMaterial1;
-	UPROPERTY(EditAnywhere) EMaterials CraftingMaterial2;
-	UPROPERTY(EditAnywhere) EMaterials ProducedMaterial;
 
 
 	// Normal Buildings Attributes
@@ -60,6 +58,9 @@ private:
 	UPROPERTY(VisibleAnywhere) float ElapsedProduction;
 
 	UPROPERTY(VisibleAnywhere) EBuildingStates BuildingState;
+	UPROPERTY(VisibleAnywhere) EMaterials CraftingMaterial1;
+	UPROPERTY(VisibleAnywhere) EMaterials CraftingMaterial2;
+	UPROPERTY(VisibleAnywhere) EMaterials ProducedMaterial;
 
 
 	// Delegate

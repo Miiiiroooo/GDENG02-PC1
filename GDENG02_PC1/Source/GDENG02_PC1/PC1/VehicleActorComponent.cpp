@@ -182,7 +182,9 @@ void UVehicleActorComponent::OnTravelingState()
 	float interpolatedValue = this->ElapsedTime / this->TravelTime;
 	FVector newPos = this->StartPosition + interpolatedValue * (this->EndPosition - this->StartPosition);
 
-	this->SetWorldLocation(newPos);
+	UE_LOG(LogTemp, Warning, TEXT("%f, %f, %f"), newPos.X, newPos.Y, newPos.Z);
+
+	this->GetOwner()->SetActorLocation(newPos);
 }
 
 //void UVehicleActorComponent::OnLoadingState()

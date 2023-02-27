@@ -33,8 +33,11 @@ private:
 
 // ATTRIBUTES
 private:
-	UPROPERTY(EditAnywhere) UBuildingActorComponent* BuildingOfTriggerBox;
-	UPROPERTY(EditAnywhere) FVector NextBuildingLocation;
+	UPROPERTY(EditAnywhere) AActor* BuildingActorOfTriggerBox;
+	UPROPERTY(EditAnywhere) UBuildingActorComponent* BuildingComponentOfTriggerBox;
 
-	FTimerHandle BuildingTriggerBoxTimerHandle;
+	UPROPERTY(EditAnywhere) AActor* NextBuildingActorOfTriggerBox;
+	UPROPERTY(EditAnywhere) UBuildingActorComponent* NextBuildingComponentOfTriggerBox;
+
+	UPROPERTY() FTimerHandle BuildingTriggerBoxTimerHandle;
 };

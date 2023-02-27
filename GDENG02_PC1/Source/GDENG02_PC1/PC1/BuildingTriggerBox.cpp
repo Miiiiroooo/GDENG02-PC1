@@ -14,7 +14,15 @@ ABuildingTriggerBox::ABuildingTriggerBox()
 
 void ABuildingTriggerBox::BeginPlay()
 {
+	if (this->BuildingActorOfTriggerBox != nullptr)
+	{
+		this->BuildingComponentOfTriggerBox = this->BuildingActorOfTriggerBox->FindComponentByClass<UBuildingActorComponent>();
+	}
 
+	if (this->NextBuildingActorOfTriggerBox != nullptr)
+	{
+		this->NextBuildingComponentOfTriggerBox = this->BuildingActorOfTriggerBox->FindComponentByClass<UBuildingActorComponent>();
+	}
 }
 
 
@@ -56,8 +64,8 @@ void ABuildingTriggerBox::OnBeginLoadingMaterialsToVehicle(UVehicleActorComponen
 {
 	TArray<EMaterials> materials;
 
-	this->BuildingOfTriggerBox->ExportMaterial(materials);
-	vehicle->LoadMaterial(this->NextBuildingLocation, materials);
+	this->BuildingComponentOfTriggerBox->ExportMaterial(materials);
+	vehicle->LoadMaterial(this->NextBuildingActorOfTriggerBox->GetActorLocation(), materials);
 }
 
 void ABuildingTriggerBox::OnBeginUnloadingMaterialsToVehicle(UVehicleActorComponent* vehicle)
@@ -65,5 +73,5 @@ void ABuildingTriggerBox::OnBeginUnloadingMaterialsToVehicle(UVehicleActorCompon
 	TArray<EMaterials> materials;
 
 	vehicle->UnloadMaterial(materials);
-	this->BuildingOfTriggerBox->ImportMaterial(materials);
+	this->BuildingComponentOfTriggerBox->ImportMaterial(materials);
 }

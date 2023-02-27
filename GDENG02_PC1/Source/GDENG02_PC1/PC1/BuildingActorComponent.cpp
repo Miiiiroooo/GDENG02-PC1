@@ -38,6 +38,8 @@ void UBuildingActorComponent::BeginPlay()
 	this->ElapsedProduction = 0.0f;
 	this->BuildingState = EBuildingStates::Waiting;
 
+	// Assign materials according to the building's type
+	AssignMaterialsToBuilding();
 
 	// Assigning delegates
 	APC1_GameMode* GameMode = Cast<APC1_GameMode>(UGameplayStatics::GetGameMode(this));
@@ -123,6 +125,54 @@ FVector UBuildingActorComponent::GetBuildingPosition()
 
 
 // PRIVATE METHODS
+void UBuildingActorComponent::AssignMaterialsToBuilding()
+{
+	switch (this->BuildingType)
+	{
+	case EBuildingTypes::Iron_Mine:
+
+		this->CraftingMaterial1 = EMaterials::None;
+		this->CraftingMaterial2 = EMaterials::None;
+		this->ProducedMaterial = EMaterials::Iron;
+		break;
+
+	case EBuildingTypes::Coal_Mine:
+
+		this->CraftingMaterial1 = EMaterials::None;
+		this->CraftingMaterial2 = EMaterials::None;
+		this->ProducedMaterial = EMaterials::Coal;
+		break;
+
+	case EBuildingTypes::Furnace:
+
+		this->CraftingMaterial1 = EMaterials::Iron;
+		this->CraftingMaterial1 = EMaterials::Coal;
+		this->ProducedMaterial = EMaterials::Steel_Beam;
+		break;
+
+	case EBuildingTypes::Lumberjack_Hut:
+
+		this->CraftingMaterial1 = EMaterials::None;
+		this->CraftingMaterial1 = EMaterials::None;
+		this->ProducedMaterial = EMaterials::Lumber;
+		break;
+
+	case EBuildingTypes::Sewing_Machine_Factory:
+
+		this->CraftingMaterial1 = EMaterials::Steel_Beam;
+		this->CraftingMaterial1 = EMaterials::Lumber;
+		this->ProducedMaterial = EMaterials::Steel_Beam;
+
+	default:
+
+		this->CraftingMaterial1 = EMaterials::Unknown;
+		this->CraftingMaterial1 = EMaterials::Unknown;
+		this->ProducedMaterial = EMaterials::Unknown;
+		break;
+		break;
+	}
+}
+
 void UBuildingActorComponent::Produce()
 {
 	this->ElapsedProduction += this->GetWorld()->GetDeltaSeconds();
