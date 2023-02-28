@@ -156,20 +156,24 @@ void UVehicleActorComponent::LoadMaterial(FVector NextBuildingLocation, TArray<E
 
 void UVehicleActorComponent::UnloadMaterial(TArray<EMaterials>& Materials)
 {
-	// Unload every material inside storage
-	for (int32 i = 0; i < Materials.Num(); i++)
+	// Unload every material inside storage into the Materials reference
+	for (int32 i = 0; i < this->Storage.Num(); i++)
 	{
-		this->Storage.RemoveSingle(Materials[0]);
+		Materials.Add(this->Storage[0]);
 	}
+
+	// Empty the storage
+	this->Storage.Empty();
 
 	// Reset values of vehicle
 	ResetDeliveryTimes();
+	this->VehicleState = EVehicleStates::Idle;
 	this->bIsVehicleAvailableToFetch = true;
 
 	// Call delegate function that vehicle is ready to fetch more materials
 	if (this->OnReadyToFetchDelegate.IsBound())
 	{
-		this->OnReadyToFetchDelegate.Broadcast();
+		this->OnReadyToFetchDelegate.Broadcast(this);
 	}
 }
 
@@ -182,42 +186,8 @@ void UVehicleActorComponent::OnTravelingState()
 	float interpolatedValue = this->ElapsedTime / this->TravelTime;
 	FVector newPos = this->StartPosition + interpolatedValue * (this->EndPosition - this->StartPosition);
 
-	UE_LOG(LogTemp, Warning, TEXT("%f, %f, %f"), newPos.X, newPos.Y, newPos.Z);
-
 	this->GetOwner()->SetActorLocation(newPos);
 }
-
-//void UVehicleActorComponent::OnLoadingState()
-//{
-//	this->ElapsedTime = 0.0f;
-//	this->VehicleState = EVehicleStates::Loading;
-//
-//	/*this->ElapsedTime += this->GetWorld()->GetDeltaSeconds();
-//
-//	if (this->ElapsedTime > this->LoadingTime)
-//	{
-//
-//	}*/
-//}
-//
-//void UVehicleActorComponent::OnUnloadingState()
-//{
-//	this->VehicleState = EVehicleStates::Unloading;
-//	this->ElapsedTime = 0.0f;
-//
-//	/*this->ElapsedTime += this->GetWorld()->GetDeltaSeconds();
-//
-//	if (this->ElapsedTime > this->UnloadingTime)
-//	{
-//		if (this->OnReadyToFetchMaterialDelegate.IsBound())
-//		{
-//			this->OnReadyToFetchMaterialDelegate.Broadcast();
-//		}
-//
-//		ResetDeliveryTimes();
-//		this->bIsVehicleAvailableToFetch = true;
-//	}*/
-//}
 
 void UVehicleActorComponent::ResetDeliveryTimes()
 {

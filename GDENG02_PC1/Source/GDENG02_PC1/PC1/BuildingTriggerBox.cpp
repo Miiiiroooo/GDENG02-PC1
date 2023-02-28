@@ -8,12 +8,15 @@
 
 ABuildingTriggerBox::ABuildingTriggerBox()
 {
-
+	this->BuildingActorOfTriggerBox = nullptr;
+	this->NextBuildingActorOfTriggerBox = nullptr;
 }
 
 
 void ABuildingTriggerBox::BeginPlay()
 {
+	Super::BeginPlay();
+
 	if (this->BuildingActorOfTriggerBox != nullptr)
 	{
 		this->BuildingComponentOfTriggerBox = this->BuildingActorOfTriggerBox->FindComponentByClass<UBuildingActorComponent>();
@@ -23,6 +26,8 @@ void ABuildingTriggerBox::BeginPlay()
 	{
 		this->NextBuildingComponentOfTriggerBox = this->BuildingActorOfTriggerBox->FindComponentByClass<UBuildingActorComponent>();
 	}
+
+	this->OnActorBeginOverlap.AddDynamic(this, &ABuildingTriggerBox::OnBeginOverlapActor);
 }
 
 
@@ -35,8 +40,7 @@ void ABuildingTriggerBox::OnBeginOverlapActor(AActor* OverlappedActor, AActor* O
 
 		if (vehicle != nullptr)
 		{
-			vehicle->StopVehicle();
-
+			// Check vehicle state and perform the loading/unloading timers
 			switch (vehicle->GetVehicleState())
 			{
 				case EVehicleStates::Fetching:
@@ -56,6 +60,9 @@ void ABuildingTriggerBox::OnBeginOverlapActor(AActor* OverlappedActor, AActor* O
 					break;
 				}
 			}
+
+			// Make vehicle stop after initializing the timers
+			vehicle->StopVehicle();
 		}
 	}
 }

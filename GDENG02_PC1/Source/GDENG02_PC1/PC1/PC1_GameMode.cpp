@@ -33,7 +33,10 @@ void APC1_GameMode::BeginPlay()
 
 void APC1_GameMode::OnBuildingReadyToExport(FVector BuildingLocation)
 {
-	this->BuildingsPendingExportList.Add(BuildingLocation);
+	if (!this->BuildingsPendingExportList.Contains(BuildingLocation))
+	{
+		this->BuildingsPendingExportList.Add(BuildingLocation);
+	}
 
 	for (auto vehicle : this->VehicleList)
 	{
@@ -48,7 +51,11 @@ void APC1_GameMode::OnBuildingReadyToExport(FVector BuildingLocation)
 }
 
 
-void APC1_GameMode::OnVehicleReadyToFetch()
+void APC1_GameMode::OnVehicleReadyToFetch(UVehicleActorComponent* vehicle)
 {
-
+	if (this->BuildingsPendingExportList.Num() != 0)
+	{
+		vehicle->FetchMaterial(this->BuildingsPendingExportList[0]);
+		this->BuildingsPendingExportList.RemoveAt(0);
+	}
 }

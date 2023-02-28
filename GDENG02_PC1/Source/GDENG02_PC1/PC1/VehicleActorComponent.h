@@ -10,7 +10,7 @@
 
 class UBuildingActorComponent; // forward declaration
 
-DECLARE_MULTICAST_DELEGATE(FOnReadyToFetchSignature);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnReadyToFetchSignature, UVehicleActorComponent*);
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -40,8 +40,6 @@ public:
 
 private:
 	UFUNCTION() void OnTravelingState();   // includes both fetching and delivering
-	/*UFUNCTION() void OnLoadingState();
-	UFUNCTION() void OnUnloadingState();*/
 	UFUNCTION() void ResetDeliveryTimes();
 	UFUNCTION() void DeliverMaterial();
 

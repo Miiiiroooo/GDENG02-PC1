@@ -26,7 +26,7 @@ public:
 // Methods
 public:
 	UFUNCTION() void OnBuildingReadyToExport(FVector BuildingLocation);
-	UFUNCTION() void OnVehicleReadyToFetch();
+	UFUNCTION() void OnVehicleReadyToFetch(UVehicleActorComponent* vehicle);
 
 
 // Attributes

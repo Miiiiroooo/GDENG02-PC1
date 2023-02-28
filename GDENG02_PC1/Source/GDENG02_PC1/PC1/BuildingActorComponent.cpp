@@ -13,6 +13,7 @@ UBuildingActorComponent::UBuildingActorComponent()
 
 	// Default Values
 	this->BuildingName = "";
+	this->BuildingType = EBuildingTypes::Unknown;
 
 	this->InputLimit = 3;
 	this->OutputLimit = 3;
@@ -76,13 +77,21 @@ void UBuildingActorComponent::TickComponent(float DeltaTime, ELevelTick TickType
 
 void UBuildingActorComponent::ImportMaterial(TArray<EMaterials>& Materials)
 {
-	if (Materials[0] == this->CraftingMaterial1 && this->InputStorageCount1 != this->InputLimit)
+	// Check if Materials at least have one item
+	if (Materials.Num() == 0)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Delivered Materials list is EMPTY!!"));
+		return;
+	}
+
+	// Check for Materials
+	if (Materials[0] == this->CraftingMaterial1 && this->InputStorageCount1 < this->InputLimit) 
 	{
 		this->InputStorageCount1 += Materials.Num();
 
 		// CONDITIONAL CHECK IF INPUT IS FULL BEFORE TAKINF MORE MATERIALS
 	}
-	else if (Materials[0] == this->CraftingMaterial2 && this->InputStorageCount2 != this->InputLimit)
+	else if (Materials[0] == this->CraftingMaterial2 && this->InputStorageCount2 < this->InputLimit)
 	{
 		this->InputStorageCount2 += Materials.Num();
 
@@ -162,13 +171,13 @@ void UBuildingActorComponent::AssignMaterialsToBuilding()
 		this->CraftingMaterial1 = EMaterials::Steel_Beam;
 		this->CraftingMaterial1 = EMaterials::Lumber;
 		this->ProducedMaterial = EMaterials::Steel_Beam;
+		break;
 
 	default:
 
 		this->CraftingMaterial1 = EMaterials::Unknown;
 		this->CraftingMaterial1 = EMaterials::Unknown;
 		this->ProducedMaterial = EMaterials::Unknown;
-		break;
 		break;
 	}
 }
