@@ -75,6 +75,16 @@ void UBuildingActorComponent::TickComponent(float DeltaTime, ELevelTick TickType
 	}
 }
 
+EBuildingTypes UBuildingActorComponent::GetType()
+{
+	return this->BuildingType;
+}
+
+FVector UBuildingActorComponent::GetLocation()
+{
+	return this->GetComponentLocation();
+}
+
 void UBuildingActorComponent::ImportMaterial(TArray<EMaterials>& Materials)
 {
 	// Check if Materials at least have one item
@@ -125,11 +135,6 @@ bool UBuildingActorComponent::CheckIfInputStorageIsFull(EMaterials material)
 	}
 
 	return isStorageFull;
-}
-
-FVector UBuildingActorComponent::GetBuildingPosition()
-{
-	return this->GetComponentTransform().GetLocation();
 }
 
 
@@ -201,7 +206,7 @@ void UBuildingActorComponent::Produce()
 		// Call the delegate function that building is ready to export
 		if (this->OnReadyToExportDelegate.IsBound() && this->ProducedMaterial != EMaterials::Sewing_Machine)
 		{
-			this->OnReadyToExportDelegate.Broadcast(this->GetComponentLocation());
+			this->OnReadyToExportDelegate.Broadcast(this);
 		}
 		else
 		{

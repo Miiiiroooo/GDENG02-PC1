@@ -11,6 +11,8 @@ UVehicleActorComponent::UVehicleActorComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// Default Values
+	this->VehicleID = -1;
+
 	this->StorageLowerLimit = 2;
 	this->StorageUpperLimit = 4;
 
@@ -167,8 +169,8 @@ void UVehicleActorComponent::UnloadMaterial(TArray<EMaterials>& Materials)
 
 	// Reset values of vehicle
 	ResetDeliveryTimes();
-	this->VehicleState = EVehicleStates::Idle;
 	this->bIsVehicleAvailableToFetch = true;
+	this->VehicleState = EVehicleStates::Idle;
 
 	// Call delegate function that vehicle is ready to fetch more materials
 	if (this->OnReadyToFetchDelegate.IsBound())

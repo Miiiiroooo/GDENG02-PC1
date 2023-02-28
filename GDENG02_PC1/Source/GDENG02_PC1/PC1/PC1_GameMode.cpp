@@ -2,6 +2,7 @@
 
 
 #include "PC1_GameMode.h"
+#include "BuildingActorComponent.h"
 #include "VehicleActorComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -31,8 +32,13 @@ void APC1_GameMode::BeginPlay()
 }
 
 
-void APC1_GameMode::OnBuildingReadyToExport(FVector BuildingLocation)
+void APC1_GameMode::OnBuildingReadyToExport(UBuildingActorComponent* Building)
 {
+	if (Building == nullptr)
+		return;
+
+	FVector BuildingLocation = Building->GetLocation();
+
 	if (!this->BuildingsPendingExportList.Contains(BuildingLocation))
 	{
 		this->BuildingsPendingExportList.Add(BuildingLocation);

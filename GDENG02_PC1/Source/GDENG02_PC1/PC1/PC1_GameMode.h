@@ -7,6 +7,7 @@
 #include "PC1_GameMode.generated.h"
 
 
+class UBuildingActorComponent; // forward declaration
 class UVehicleActorComponent; // forward declaration
 
 
@@ -25,7 +26,7 @@ public:
 
 // Methods
 public:
-	UFUNCTION() void OnBuildingReadyToExport(FVector BuildingLocation);
+	UFUNCTION() void OnBuildingReadyToExport(UBuildingActorComponent* Building);
 	UFUNCTION() void OnVehicleReadyToFetch(UVehicleActorComponent* vehicle);
 
 

@@ -8,7 +8,7 @@
 #include "BuildingActorComponent.generated.h"
 
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnReadyToExportSignature, FVector); // REECONSIDER MULTICAST
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnReadyToExportSignature, UBuildingActorComponent*); // REECONSIDER MULTICAST
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -27,10 +27,12 @@ protected:
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	UFUNCTION() EBuildingTypes GetType();
+	UFUNCTION() FVector GetLocation();
+
 	UFUNCTION() void ImportMaterial(TArray<EMaterials>& Materials);
 	UFUNCTION() void ExportMaterial(TArray<EMaterials>& Materials);
 	UFUNCTION() bool CheckIfInputStorageIsFull(EMaterials material);
-	UFUNCTION() FVector GetBuildingPosition();
 
 private:
 	UFUNCTION() void AssignMaterialsToBuilding();

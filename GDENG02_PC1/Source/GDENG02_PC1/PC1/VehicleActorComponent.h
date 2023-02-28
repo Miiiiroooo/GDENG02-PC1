@@ -47,6 +47,7 @@ private:
 // ATTRIBUTES
 private:
 	// Configurables
+	UPROPERTY(EditAnywhere) uint32 VehicleID;
 	UPROPERTY(EditAnywhere) uint32 StorageLowerLimit;
 	UPROPERTY(EditAnywhere) uint32 StorageUpperLimit;
 	UPROPERTY(EditAnywhere) uint32 LoadingTimeLowerLimit;
