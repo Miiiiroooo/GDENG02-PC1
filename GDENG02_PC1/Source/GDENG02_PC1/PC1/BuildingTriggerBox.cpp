@@ -78,6 +78,12 @@ void ABuildingTriggerBox::OnBeginLoadingMaterialsToVehicle(UVehicleActorComponen
 void ABuildingTriggerBox::OnBeginUnloadingMaterialsToVehicle(UVehicleActorComponent* vehicle)
 {
 	TArray<EMaterials> materials;
+	EMaterials importedMaterial = vehicle->GetMaterialInStorage();
+
+	if (this->BuildingComponentOfTriggerBox->CheckIfInputStorageIsFull(importedMaterial))
+	{
+		return;
+	}
 
 	vehicle->UnloadMaterial(materials);
 	this->BuildingComponentOfTriggerBox->ImportMaterial(materials);

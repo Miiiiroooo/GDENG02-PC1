@@ -2,8 +2,10 @@
 
 
 #include "BuildingActorComponent.h"
+#include "BuildingUserWidget.h"
 #include "UserDefinedDataTypes.h"
 #include "PC1_GameMode.h"
+#include "PC1_HUD.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -47,6 +49,25 @@ void UBuildingActorComponent::BeginPlay()
 	if (GameMode != nullptr)
 	{
 		this->OnReadyToExportDelegate.AddUObject(GameMode, &APC1_GameMode::OnBuildingReadyToExport);
+	}
+
+	// Update HUD
+	this->HUD = Cast<APC1_HUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+	if (this->HUD != nullptr && this->HUD->GetBuildingWidget() != nullptr)
+	{
+		this->HUD->GetBuildingWidget()->SetBuildingName(this->BuildingName);
+
+		this->HUD->GetBuildingWidget()->SetCraftingMaterial1(this->CraftingMaterial1);
+		this->HUD->GetBuildingWidget()->SetCraftingMaterial2(this->CraftingMaterial2);
+		this->HUD->GetBuildingWidget()->SetProducedMaterial(this->ProducedMaterial);
+
+		this->HUD->GetBuildingWidget()->SetInputStorage1Text(this->InputStorageCount1, this->InputLimit);
+		this->HUD->GetBuildingWidget()->SetInputStorage2Text(this->InputStorageCount2, this->InputLimit);
+		this->HUD->GetBuildingWidget()->SetOutputStorageText(this->OutputStorageCount, this->OutputLimit);
+
+		this->HUD->GetBuildingWidget()->SetBuildingState(this->BuildingState);
+		this->HUD->GetBuildingWidget()->SetProductionSpeed(this->ProductionSpeed);
+		this->HUD->GetBuildingWidget()->SetElapsedProductionTime(this->ElapsedProduction, this->ProductionSpeed);
 	}
 }
 
@@ -98,12 +119,14 @@ void UBuildingActorComponent::ImportMaterial(TArray<EMaterials>& Materials)
 	if (Materials[0] == this->CraftingMaterial1 && this->InputStorageCount1 < this->InputLimit) 
 	{
 		this->InputStorageCount1 += Materials.Num();
+		this->HUD->GetBuildingWidget()->SetInputStorage1Text(this->InputStorageCount1, this->InputLimit);
 
 		// CONDITIONAL CHECK IF INPUT IS FULL BEFORE TAKINF MORE MATERIALS
 	}
 	else if (Materials[0] == this->CraftingMaterial2 && this->InputStorageCount2 < this->InputLimit)
 	{
 		this->InputStorageCount2 += Materials.Num();
+		this->HUD->GetBuildingWidget()->SetInputStorage2Text(this->InputStorageCount2, this->InputLimit);
 
 		// CONDITIONAL CHECK IF INPUT IS FULL BEFORE TAKINF MORE MATERIALS
 	}
@@ -117,6 +140,7 @@ void UBuildingActorComponent::ExportMaterial(TArray<EMaterials>& Materials)
 	}
 
 	this->OutputStorageCount = 0;
+	this->HUD->GetBuildingWidget()->SetOutputStorageText(this->OutputStorageCount, this->OutputLimit);
 
 	// CONDITIONAL CHECK IF OUTPUT REACHES LIMIT OF VEHICLE
 }
@@ -160,28 +184,28 @@ void UBuildingActorComponent::AssignMaterialsToBuilding()
 	case EBuildingTypes::Furnace:
 
 		this->CraftingMaterial1 = EMaterials::Iron;
-		this->CraftingMaterial1 = EMaterials::Coal;
+		this->CraftingMaterial2 = EMaterials::Coal;
 		this->ProducedMaterial = EMaterials::Steel_Beam;
 		break;
 
 	case EBuildingTypes::Lumberjack_Hut:
 
 		this->CraftingMaterial1 = EMaterials::None;
-		this->CraftingMaterial1 = EMaterials::None;
+		this->CraftingMaterial2 = EMaterials::None;
 		this->ProducedMaterial = EMaterials::Lumber;
 		break;
 
 	case EBuildingTypes::Sewing_Machine_Factory:
 
 		this->CraftingMaterial1 = EMaterials::Steel_Beam;
-		this->CraftingMaterial1 = EMaterials::Lumber;
+		this->CraftingMaterial2 = EMaterials::Lumber;
 		this->ProducedMaterial = EMaterials::Steel_Beam;
 		break;
 
 	default:
 
 		this->CraftingMaterial1 = EMaterials::Unknown;
-		this->CraftingMaterial1 = EMaterials::Unknown;
+		this->CraftingMaterial2 = EMaterials::Unknown;
 		this->ProducedMaterial = EMaterials::Unknown;
 		break;
 	}
@@ -190,6 +214,7 @@ void UBuildingActorComponent::AssignMaterialsToBuilding()
 void UBuildingActorComponent::Produce()
 {
 	this->ElapsedProduction += this->GetWorld()->GetDeltaSeconds();
+	this->HUD->GetBuildingWidget()->SetElapsedProductionTime(this->ElapsedProduction, this->ProductionSpeed);
 
 	if (this->ElapsedProduction >= this->ProductionSpeed)
 	{
@@ -197,6 +222,7 @@ void UBuildingActorComponent::Produce()
 		if (this->OutputStorageCount < this->OutputLimit)
 		{
 			this->OutputStorageCount++;
+			this->HUD->GetBuildingWidget()->SetOutputStorageText(this->OutputStorageCount, this->OutputLimit);
 		}
 		else
 		{
@@ -216,6 +242,7 @@ void UBuildingActorComponent::Produce()
 		// Reset the properties of the building
 		this->BuildingState = EBuildingStates::Waiting;
 		this->ElapsedProduction = 0;
+		this->HUD->GetBuildingWidget()->SetBuildingState(this->BuildingState);
 	}
 }
 
@@ -231,6 +258,7 @@ void UBuildingActorComponent::CheckIfBuildingCanProduce()
 		{
 			this->bHasPendingMaterialForOutput = false;
 			this->OutputStorageCount++;
+			this->HUD->GetBuildingWidget()->SetOutputStorageText(this->OutputStorageCount, this->OutputLimit);
 		}
 
 		this->BuildingState = EBuildingStates::Producing;
@@ -242,12 +270,17 @@ void UBuildingActorComponent::CheckIfBuildingCanProduce()
 		{
 			this->bHasPendingMaterialForOutput = false;
 			this->OutputStorageCount++;
+			this->HUD->GetBuildingWidget()->SetOutputStorageText(this->OutputStorageCount, this->OutputLimit);
 		}
 
 		this->InputStorageCount1--;
 		this->InputStorageCount2--;
 
+		this->HUD->GetBuildingWidget()->SetInputStorage1Text(this->InputStorageCount1, this->InputLimit);
+		this->HUD->GetBuildingWidget()->SetInputStorage2Text(this->InputStorageCount2, this->InputLimit);
+
 		this->BuildingState = EBuildingStates::Producing;
+		this->HUD->GetBuildingWidget()->SetBuildingState(this->BuildingState);
 		Produce();
 	}
 }

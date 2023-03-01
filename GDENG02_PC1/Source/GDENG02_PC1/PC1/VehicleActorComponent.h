@@ -30,6 +30,8 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION() EVehicleStates GetVehicleState();
+	UFUNCTION() EMaterials GetMaterialInStorage();
+	UFUNCTION() int32 GetStorageCount();
 	UFUNCTION() float GetLoadingTime();
 	UFUNCTION() float GetUnloadingTime();
 	UFUNCTION() bool IsVehicleAvailableToFetch();
@@ -67,9 +69,9 @@ private:
 	UPROPERTY(VisibleAnywhere) uint32 StorageLimit;
 	UPROPERTY(VisibleAnywhere) TArray<EMaterials> Storage;
 
-	UPROPERTY(VisibleAnywhere) float LoadingTime;
-	UPROPERTY(VisibleAnywhere) float TravelTime;
-	UPROPERTY(VisibleAnywhere) float UnloadingTime;
+	UPROPERTY(VisibleAnywhere) uint32 LoadingTime;
+	UPROPERTY(VisibleAnywhere) uint32 TravelTime;
+	UPROPERTY(VisibleAnywhere) uint32 UnloadingTime;
 	UPROPERTY(VisibleAnywhere) float ElapsedTime;
 
 	UPROPERTY(VisibleAnywhere) FVector StartPosition;
@@ -77,6 +79,8 @@ private:
 
 	UPROPERTY(VisibleAnywhere) bool bIsVehicleAvailableToFetch;
 	UPROPERTY(VisibleAnywhere) EVehicleStates VehicleState;
+
+	UPROPERTY() class APC1_HUD* HUD;
 
 
 	// Delegates

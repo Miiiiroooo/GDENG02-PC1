@@ -32,6 +32,6 @@ public:
 
 // Attributes
 private:
-	UPROPERTY(VisibleAnywhere) TArray<UVehicleActorComponent*> VehicleList;
+	UPROPERTY() TArray<UVehicleActorComponent*> VehicleList;
 	UPROPERTY(VisibleAnywhere) TArray<FVector> BuildingsPendingExportList;
 };

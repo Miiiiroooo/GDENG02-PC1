@@ -64,6 +64,8 @@ private:
 	UPROPERTY(VisibleAnywhere) EMaterials CraftingMaterial2;
 	UPROPERTY(VisibleAnywhere) EMaterials ProducedMaterial;
 
+	UPROPERTY() class APC1_HUD* HUD;
+
 
 	// Delegate
 	FOnReadyToExportSignature OnReadyToExportDelegate;
