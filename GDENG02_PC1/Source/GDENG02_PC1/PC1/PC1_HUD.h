@@ -7,9 +7,10 @@
 #include "PC1_HUD.generated.h"
 
 
-class UUserWidget; // forward declaration
 class UBuildingUserWidget; 
 class UVehicleUserWidget;
+class UBuildingActorComponent;
+class UVehicleActorComponent;
 
 
 UCLASS()
@@ -21,11 +22,14 @@ class GDENG02_PC1_API APC1_HUD : public AHUD
 public:
 	APC1_HUD();
 
+	void OnChangeWidget(int32 Change);
 	UBuildingUserWidget* GetBuildingWidget();
 	UVehicleUserWidget* GetVehicleWidget();
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
+	void DisplayWidgetBasedOnIndex();
 
 
 // ATTRIBUTES
@@ -34,4 +38,8 @@ private:
 	UPROPERTY(EditAnywhere) TSubclassOf<UVehicleUserWidget> VehicleHUDClass;
 	UPROPERTY() UBuildingUserWidget* BuildingUserWidget;
 	UPROPERTY() UVehicleUserWidget* VehicleUserWidget;
+	UPROPERTY() TArray<UBuildingActorComponent*> BuildingList;
+	UPROPERTY() TArray<UVehicleActorComponent*> VehicleList;
+	UPROPERTY() int32 CurrentIndex;
+	UPROPERTY() int32 IndexLimit;
 };

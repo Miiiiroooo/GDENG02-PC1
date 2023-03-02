@@ -53,22 +53,6 @@ void UBuildingActorComponent::BeginPlay()
 
 	// Update HUD
 	this->HUD = Cast<APC1_HUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
-	if (this->HUD != nullptr && this->HUD->GetBuildingWidget() != nullptr)
-	{
-		this->HUD->GetBuildingWidget()->SetBuildingName(this->BuildingName);
-
-		this->HUD->GetBuildingWidget()->SetCraftingMaterial1(this->CraftingMaterial1);
-		this->HUD->GetBuildingWidget()->SetCraftingMaterial2(this->CraftingMaterial2);
-		this->HUD->GetBuildingWidget()->SetProducedMaterial(this->ProducedMaterial);
-
-		this->HUD->GetBuildingWidget()->SetInputStorage1Text(this->InputStorageCount1, this->InputLimit);
-		this->HUD->GetBuildingWidget()->SetInputStorage2Text(this->InputStorageCount2, this->InputLimit);
-		this->HUD->GetBuildingWidget()->SetOutputStorageText(this->OutputStorageCount, this->OutputLimit);
-
-		this->HUD->GetBuildingWidget()->SetBuildingState(this->BuildingState);
-		this->HUD->GetBuildingWidget()->SetProductionSpeed(this->ProductionSpeed);
-		this->HUD->GetBuildingWidget()->SetElapsedProductionTime(this->ElapsedProduction, this->ProductionSpeed);
-	}
 }
 
 
@@ -76,7 +60,6 @@ void UBuildingActorComponent::BeginPlay()
 void UBuildingActorComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
 
 	switch (this->BuildingState)
 	{
@@ -106,6 +89,26 @@ FVector UBuildingActorComponent::GetLocation()
 	return this->GetComponentLocation();
 }
 
+void UBuildingActorComponent::UpdateHUD()
+{
+	if (this->HUD != nullptr && this->HUD->GetBuildingWidget() != nullptr)
+	{
+		this->HUD->GetBuildingWidget()->SetBuildingName(this->BuildingName);
+
+		this->HUD->GetBuildingWidget()->SetCraftingMaterial1(this->CraftingMaterial1);
+		this->HUD->GetBuildingWidget()->SetCraftingMaterial2(this->CraftingMaterial2);
+		this->HUD->GetBuildingWidget()->SetProducedMaterial(this->ProducedMaterial);
+
+		this->HUD->GetBuildingWidget()->SetInputStorage1Text(this->InputStorageCount1, this->InputLimit);
+		this->HUD->GetBuildingWidget()->SetInputStorage2Text(this->InputStorageCount2, this->InputLimit);
+		this->HUD->GetBuildingWidget()->SetOutputStorageText(this->OutputStorageCount, this->OutputLimit);
+
+		this->HUD->GetBuildingWidget()->SetBuildingState(this->BuildingState);
+		this->HUD->GetBuildingWidget()->SetProductionSpeed(this->ProductionSpeed);
+		this->HUD->GetBuildingWidget()->SetElapsedProductionTime(this->ElapsedProduction, this->ProductionSpeed);
+	}
+}
+
 void UBuildingActorComponent::ImportMaterial(TArray<EMaterials>& Materials)
 {
 	// Check if Materials at least have one item
@@ -119,14 +122,12 @@ void UBuildingActorComponent::ImportMaterial(TArray<EMaterials>& Materials)
 	if (Materials[0] == this->CraftingMaterial1 && this->InputStorageCount1 < this->InputLimit) 
 	{
 		this->InputStorageCount1 += Materials.Num();
-		this->HUD->GetBuildingWidget()->SetInputStorage1Text(this->InputStorageCount1, this->InputLimit);
 
 		// CONDITIONAL CHECK IF INPUT IS FULL BEFORE TAKINF MORE MATERIALS
 	}
 	else if (Materials[0] == this->CraftingMaterial2 && this->InputStorageCount2 < this->InputLimit)
 	{
 		this->InputStorageCount2 += Materials.Num();
-		this->HUD->GetBuildingWidget()->SetInputStorage2Text(this->InputStorageCount2, this->InputLimit);
 
 		// CONDITIONAL CHECK IF INPUT IS FULL BEFORE TAKINF MORE MATERIALS
 	}
@@ -140,7 +141,6 @@ void UBuildingActorComponent::ExportMaterial(TArray<EMaterials>& Materials)
 	}
 
 	this->OutputStorageCount = 0;
-	this->HUD->GetBuildingWidget()->SetOutputStorageText(this->OutputStorageCount, this->OutputLimit);
 
 	// CONDITIONAL CHECK IF OUTPUT REACHES LIMIT OF VEHICLE
 }
@@ -214,7 +214,6 @@ void UBuildingActorComponent::AssignMaterialsToBuilding()
 void UBuildingActorComponent::Produce()
 {
 	this->ElapsedProduction += this->GetWorld()->GetDeltaSeconds();
-	this->HUD->GetBuildingWidget()->SetElapsedProductionTime(this->ElapsedProduction, this->ProductionSpeed);
 
 	if (this->ElapsedProduction >= this->ProductionSpeed)
 	{
@@ -222,7 +221,6 @@ void UBuildingActorComponent::Produce()
 		if (this->OutputStorageCount < this->OutputLimit)
 		{
 			this->OutputStorageCount++;
-			this->HUD->GetBuildingWidget()->SetOutputStorageText(this->OutputStorageCount, this->OutputLimit);
 		}
 		else
 		{
@@ -242,7 +240,6 @@ void UBuildingActorComponent::Produce()
 		// Reset the properties of the building
 		this->BuildingState = EBuildingStates::Waiting;
 		this->ElapsedProduction = 0;
-		this->HUD->GetBuildingWidget()->SetBuildingState(this->BuildingState);
 	}
 }
 
@@ -258,7 +255,6 @@ void UBuildingActorComponent::CheckIfBuildingCanProduce()
 		{
 			this->bHasPendingMaterialForOutput = false;
 			this->OutputStorageCount++;
-			this->HUD->GetBuildingWidget()->SetOutputStorageText(this->OutputStorageCount, this->OutputLimit);
 		}
 
 		this->BuildingState = EBuildingStates::Producing;
@@ -270,17 +266,12 @@ void UBuildingActorComponent::CheckIfBuildingCanProduce()
 		{
 			this->bHasPendingMaterialForOutput = false;
 			this->OutputStorageCount++;
-			this->HUD->GetBuildingWidget()->SetOutputStorageText(this->OutputStorageCount, this->OutputLimit);
 		}
 
 		this->InputStorageCount1--;
 		this->InputStorageCount2--;
 
-		this->HUD->GetBuildingWidget()->SetInputStorage1Text(this->InputStorageCount1, this->InputLimit);
-		this->HUD->GetBuildingWidget()->SetInputStorage2Text(this->InputStorageCount2, this->InputLimit);
-
 		this->BuildingState = EBuildingStates::Producing;
-		this->HUD->GetBuildingWidget()->SetBuildingState(this->BuildingState);
 		Produce();
 	}
 }

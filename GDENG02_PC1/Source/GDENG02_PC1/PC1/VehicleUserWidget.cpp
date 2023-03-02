@@ -18,23 +18,32 @@ void UVehicleUserWidget::SetVehicleID(uint32 ID)
 
 void UVehicleUserWidget::SetStorage(TArray<EMaterials>& Materials)
 {
-	if (this->Storage_Text == nullptr && Materials.Num() == 0)
+	if (this->Storage_Text == nullptr)
 		return;
 
+	FText text;
 
-	FText text = FText::Format(LOCTEXT("Storage_Key", "Storage: {Item} - {Count}"), UEnum::GetDisplayValueAsText(Materials[0]), Materials.Num());
+	if (Materials.Num() == 0)
+	{
+		text = FText::Format(LOCTEXT("Storage_Key", "Storage: {Item} - {Count}"), UEnum::GetDisplayValueAsText(EMaterials::None), Materials.Num());
+	}
+	else if (Materials.Num() > 0)
+	{
+		text = FText::Format(LOCTEXT("Storage_Key", "Storage: {Item} - {Count}"), UEnum::GetDisplayValueAsText(Materials[0]), Materials.Num());
+	}
+
 	this->Storage_Text->SetText(text);
 }
 
-void UVehicleUserWidget::SetDestination(EBuildingTypes Type)
-{
-	if (this->Destination_Text == nullptr)
-		return;
-
-
-	FText text = FText::Format(LOCTEXT("Destination_Key", "Destination: {Type}"), UEnum::GetDisplayValueAsText(Type));
-	this->Destination_Text->SetText(text);
-}
+//void UVehicleUserWidget::SetDestination(EBuildingTypes Type)
+//{
+//	if (this->Destination_Text == nullptr)
+//		return;
+//
+//
+//	FText text = FText::Format(LOCTEXT("Destination_Key", "Destination: {Type}"), UEnum::GetDisplayValueAsText(Type));
+//	this->Destination_Text->SetText(text);
+//}
 
 void UVehicleUserWidget::SetVehicleState(EVehicleStates State)
 {

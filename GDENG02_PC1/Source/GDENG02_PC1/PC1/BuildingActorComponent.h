@@ -8,7 +8,7 @@
 #include "BuildingActorComponent.generated.h"
 
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnReadyToExportSignature, UBuildingActorComponent*); // REECONSIDER MULTICAST
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnReadyToExportSignature, UBuildingActorComponent*); 
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -27,6 +27,7 @@ protected:
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	UFUNCTION() void UpdateHUD();
 	UFUNCTION() EBuildingTypes GetType();
 	UFUNCTION() FVector GetLocation();
 

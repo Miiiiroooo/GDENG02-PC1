@@ -69,6 +69,9 @@ void ABuildingTriggerBox::OnBeginOverlapActor(AActor* OverlappedActor, AActor* O
 
 void ABuildingTriggerBox::OnBeginLoadingMaterialsToVehicle(UVehicleActorComponent* vehicle)
 {
+	if (this->BuildingComponentOfTriggerBox == nullptr)
+		return;
+
 	TArray<EMaterials> materials;
 
 	this->BuildingComponentOfTriggerBox->ExportMaterial(materials);
@@ -77,6 +80,9 @@ void ABuildingTriggerBox::OnBeginLoadingMaterialsToVehicle(UVehicleActorComponen
 
 void ABuildingTriggerBox::OnBeginUnloadingMaterialsToVehicle(UVehicleActorComponent* vehicle)
 {
+	if (this->BuildingComponentOfTriggerBox == nullptr)
+		return;
+	
 	TArray<EMaterials> materials;
 	EMaterials importedMaterial = vehicle->GetMaterialInStorage();
 

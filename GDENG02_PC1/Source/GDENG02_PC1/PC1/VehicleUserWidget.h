@@ -23,7 +23,7 @@ public:
 	void SetVehicleID(uint32 ID);
 	void SetStorage(TArray<EMaterials>& Materials);
 
-	void SetDestination(EBuildingTypes Type);
+	//void SetDestination(EBuildingTypes Type);
 	void SetVehicleState(EVehicleStates State);
 
 	void SetLoadingTime(uint32 Time);
@@ -37,7 +37,7 @@ public:
 	UPROPERTY(EditAnywhere, meta = (BindWidget)) class UTextBlock* VehicleID_Text;
 	UPROPERTY(EditAnywhere, meta = (BindWidget)) class UTextBlock* Storage_Text;
 
-	UPROPERTY(EditAnywhere, meta = (BindWidget)) class UTextBlock* Destination_Text;
+	//UPROPERTY(EditAnywhere, meta = (BindWidget)) class UTextBlock* Destination_Text;
 	UPROPERTY(EditAnywhere, meta = (BindWidget)) class UTextBlock* VehicleState_Text;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget)) class UTextBlock* LoadingTime_Text;

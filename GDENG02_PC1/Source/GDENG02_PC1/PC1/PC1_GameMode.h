@@ -33,5 +33,7 @@ public:
 // Attributes
 private:
 	UPROPERTY() TArray<UVehicleActorComponent*> VehicleList;
-	UPROPERTY(VisibleAnywhere) TArray<FVector> BuildingsPendingExportList;
+	UPROPERTY(VisibleAnywhere) TArray<UBuildingActorComponent*> BuildingsPendingExportList;
+
+	UPROPERTY() class APC1_HUD* HUD;
 };

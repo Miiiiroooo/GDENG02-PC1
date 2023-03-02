@@ -29,11 +29,13 @@ protected:
 public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	UFUNCTION() void UpdateHUD();
 	UFUNCTION() EVehicleStates GetVehicleState();
 	UFUNCTION() EMaterials GetMaterialInStorage();
 	UFUNCTION() int32 GetStorageCount();
 	UFUNCTION() float GetLoadingTime();
 	UFUNCTION() float GetUnloadingTime();
+
 	UFUNCTION() bool IsVehicleAvailableToFetch();
 	UFUNCTION() void FetchMaterial(FVector BuildingLocation);
 	UFUNCTION() void StopVehicle();

@@ -68,19 +68,6 @@ void UVehicleActorComponent::BeginPlay()
 
 	// Update HUD
 	this->HUD = Cast<APC1_HUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
-	if (this->HUD != nullptr && this->HUD->GetBuildingWidget() != nullptr)
-	{
-		this->HUD->GetVehicleWidget()->SetVehicleID(this->VehicleID);
-		this->HUD->GetVehicleWidget()->SetStorage(this->Storage);
-
-		this->HUD->GetVehicleWidget()->SetDestination(EBuildingTypes::Unknown);
-		this->HUD->GetVehicleWidget()->SetVehicleState(this->VehicleState);
-
-		this->HUD->GetVehicleWidget()->SetLoadingTime(this->LoadingTime);
-		this->HUD->GetVehicleWidget()->SetUnloadingTime(this->UnloadingTime);
-		this->HUD->GetVehicleWidget()->SetTravelTime(this->TravelTime);
-		this->HUD->GetVehicleWidget()->SetElapsedTime(this->ElapsedTime, this->TravelTime);
-	}
 }
 
 
@@ -88,7 +75,6 @@ void UVehicleActorComponent::BeginPlay()
 void UVehicleActorComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
 
 	switch (this->VehicleState)
 	{
@@ -105,6 +91,21 @@ void UVehicleActorComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	default:
 
 		break;
+	}
+}
+
+void UVehicleActorComponent::UpdateHUD()
+{
+	if (this->HUD != nullptr && this->HUD->GetVehicleWidget() != nullptr)
+	{
+		this->HUD->GetVehicleWidget()->SetVehicleID(this->VehicleID);
+		this->HUD->GetVehicleWidget()->SetStorage(this->Storage);
+		this->HUD->GetVehicleWidget()->SetVehicleState(this->VehicleState);
+
+		this->HUD->GetVehicleWidget()->SetLoadingTime(this->LoadingTime);
+		this->HUD->GetVehicleWidget()->SetUnloadingTime(this->UnloadingTime);
+		this->HUD->GetVehicleWidget()->SetTravelTime(this->TravelTime);
+		this->HUD->GetVehicleWidget()->SetElapsedTime(this->ElapsedTime, this->TravelTime);
 	}
 }
 
@@ -147,8 +148,6 @@ void UVehicleActorComponent::FetchMaterial(FVector BuildingLocation)
 
 		this->StartPosition = this->GetComponentLocation();
 		this->EndPosition = BuildingLocation;
-
-		this->HUD->GetVehicleWidget()->SetVehicleState(this->VehicleState);
 	}
 }
 
@@ -156,23 +155,24 @@ void UVehicleActorComponent::StopVehicle()
 {
 	switch (this->VehicleState)
 	{
-	case EVehicleStates::Fetching:
+		case EVehicleStates::Fetching:
+		{
+			this->VehicleState = EVehicleStates::Loading;
+			this->ElapsedTime = 0.0f;
 
-		this->VehicleState = EVehicleStates::Loading;
-		this->ElapsedTime = 0.0f;
-		this->HUD->GetVehicleWidget()->SetVehicleState(this->VehicleState);
-		break;
+			break;
+		}
+		case EVehicleStates::Delivering:
+		{
+			this->VehicleState = EVehicleStates::Unloading;
+			this->ElapsedTime = 0.0f;
 
-	case EVehicleStates::Delivering:
-
-		this->VehicleState = EVehicleStates::Unloading;
-		this->ElapsedTime = 0.0f;
-		this->HUD->GetVehicleWidget()->SetVehicleState(this->VehicleState);
-		break;
-
-	default:
-
-		break;
+			break;
+		}
+		default:
+		{
+			break;
+		}
 	}
 }
 
@@ -182,8 +182,6 @@ void UVehicleActorComponent::LoadMaterial(FVector NextBuildingLocation, TArray<E
 	{
 		this->Storage.Add(Materials[0]);
 	}
-
-	this->HUD->GetVehicleWidget()->SetStorage(this->Storage);
 
 	this->VehicleState = EVehicleStates::Delivering;
 	this->StartPosition = this->GetComponentLocation();
@@ -200,13 +198,11 @@ void UVehicleActorComponent::UnloadMaterial(TArray<EMaterials>& Materials)
 
 	// Empty the storage
 	this->Storage.Empty();
-	this->HUD->GetVehicleWidget()->SetStorage(this->Storage);
 
 	// Reset values of vehicle
 	ResetDeliveryTimes();
 	this->bIsVehicleAvailableToFetch = true;
 	this->VehicleState = EVehicleStates::Idle;
-	this->HUD->GetVehicleWidget()->SetVehicleState(this->VehicleState);
 
 	// Call delegate function that vehicle is ready to fetch more materials
 	if (this->OnReadyToFetchDelegate.IsBound())
@@ -223,9 +219,8 @@ void UVehicleActorComponent::OnTravelingState()
 
 	float interpolatedValue = this->ElapsedTime / this->TravelTime;
 	FVector newPos = this->StartPosition + interpolatedValue * (this->EndPosition - this->StartPosition);
-
+	newPos.Z += 30.0f;
 	this->GetOwner()->SetActorLocation(newPos);
-	this->HUD->GetVehicleWidget()->SetElapsedTime(this->ElapsedTime, this->TravelTime);
 }
 
 void UVehicleActorComponent::ResetDeliveryTimes()
@@ -233,15 +228,10 @@ void UVehicleActorComponent::ResetDeliveryTimes()
 	this->LoadingTime = (uint32)FMath::RandRange((int32)this->LoadingTimeLowerLimit, (int32)this->LoadingTimeUpperLimit);
 	this->UnloadingTime = (uint32)FMath::RandRange((int32)this->UnloadingTimeLowerLimit, (int32)this->UnloadingTimeUpperLimit);
 	this->TravelTime = (uint32)FMath::RandRange((int32)this->TravelTimeLowerLimit, (int32)this->TravelTimeUpperLimit);
-
-	this->HUD->GetVehicleWidget()->SetLoadingTime(this->LoadingTime);
-	this->HUD->GetVehicleWidget()->SetUnloadingTime(this->UnloadingTime);
-	this->HUD->GetVehicleWidget()->SetTravelTime(this->TravelTime);
 }
 
 void UVehicleActorComponent::DeliverMaterial()
 {
 	this->VehicleState = EVehicleStates::Delivering;
 	this->ElapsedTime = 0.0f;
-	this->HUD->GetVehicleWidget()->SetVehicleState(this->VehicleState);
 }
