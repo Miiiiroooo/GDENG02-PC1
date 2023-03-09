@@ -57,6 +57,14 @@ enum class EVehicleStates : uint8
 	Unloading               UMETA(DisplayName = "Unloading")
 };
 
+UENUM()
+enum class EDoorStates : uint8
+{
+	Unknown				    UMETA(DisplayName = "Unknown"),
+	Open 					UMETA(DisplayName = "Open"),
+	Closed					UMETA(DisplayName = "Closed"),
+};
+
 #pragma endregion ENUMS
 
 
